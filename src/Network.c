@@ -48,32 +48,34 @@ char *build_post_request(const char *host, const char *device_id, const char *te
             device_id, current_time, temperature);
     //Full HTTP post request
     snprintf(buffer, sizeof(buffer),
-            "POST /post HTTP/1.1\r\n"
-            "Host: %s\r\n"
-            "Content-Type: application/json\r\n"
-            "Content-Length: %zu\r\n"
-            "\r\n"
-            "%s",
-            host, strlen(json_body), json_body);
+         "POST /post HTTP/1.1\r\n"   // <-- changed from "/" to "/post"
+         "Host: %s\r\n"
+         "Content-Type: application/json\r\n"
+         "Content-Length: %zu\r\n"
+         "Connection: close\r\n"
+         "\r\n"
+         "%s",
+         host, strlen(json_body), json_body);
 
     return buffer;
 }
 
-void send_post(int sockfd, const char *request, void (*response_handler)(char *)){
-    ssize_t sent = send(sockfd, request, strlen(request), 0);
-    if (sent < 0) {
+void send_post(int sockfd, const char *request, void (*response_handler)(char *)) {
+    if (send(sockfd, request, strlen(request), 0) < 0) {
         perror("send");
         return;
     }
 
     char buffer[2048];
-    ssize_t received = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
-    if (received > 0) {
-        buffer[received] = '\0';
-        if (response_handler) response_handler(buffer);  // function pointer usage
-    } else if (received == 0) {
-        printf("Server closed the connection.\n");
-    } else {
+    ssize_t bytes;
+
+    // Receive until the server closes the connection
+    while ((bytes = recv(sockfd, buffer, sizeof(buffer) - 1, 0)) > 0) {
+        buffer[bytes] = '\0';         // Null-terminate
+        response_handler(buffer);     // Print each chunk immediately
+    }
+
+    if (bytes < 0) {
         perror("recv");
     }
 }
