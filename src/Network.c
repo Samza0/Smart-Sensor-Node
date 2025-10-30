@@ -48,7 +48,7 @@ char *build_post_request(const char *host, const char *device_id, const char *te
             device_id, current_time, temperature);
     //Full HTTP post request
     snprintf(buffer, sizeof(buffer),
-            "POST / HTTP/1.1\r\n"
+            "POST /post HTTP/1.1\r\n"
             "Host: %s\r\n"
             "Content-Type: application/json\r\n"
             "Content-Length: %zu\r\n"
@@ -81,5 +81,4 @@ void send_post(int sockfd, const char *request, void (*response_handler)(char *)
 void print_response(char *response){
     printf("Server response:\n%s\n", response);
 }
-
     

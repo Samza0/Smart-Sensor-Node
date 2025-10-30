@@ -1,29 +1,29 @@
-# Compiler and flags
+# Compiler
 CC = gcc
-CFLAGS = -Wall -Wextra -g -IIncludes
 
-# Source files in src/
-SOURCES = $(wildcard src/*.c)
+# Compiler flags (include directory added here)
+CFLAGS = -Wall -g -IIncludes
 
-# Object files in build/
-OBJECTS = $(SOURCES:src/%.c=build/%.o)
+# Source files
+SRC = src/main.c src/Network.c src/Utils.c
 
-# Final executable
-TARGET = client
+# Object files
+OBJ = $(SRC:.c=.o)
 
+# Output executable
+TARGET = smart_sensor
+
+# Default target
 all: $(TARGET)
 
-# Link object files into executable
-$(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
+# Build the executable
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
-# Compile .c files into .o files
-build/%.o: src/%.c | build
+# Compile source files into object files
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Create build folder if it doesn't exist
-build:
-	mkdir -p build
-
+# Clean object files and executable
 clean:
-	rm -rf build $(TARGET)
+	rm -f $(OBJ) $(TARGET)
